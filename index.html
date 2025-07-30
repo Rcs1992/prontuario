@@ -1,18 +1,42 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Login</title>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-  <script src="firebase-config.js"></script>
-  <script src="script.js" defer></script>
 </head>
 <body>
-  <h2>Login</h2>
-  <input type="email" id="email" placeholder="E-mail" required />
-  <input type="password" id="password" placeholder="Senha" required />
+  <h1>Login</h1>
+  <input type="email" id="email" placeholder="E-mail" />
+  <input type="password" id="password" placeholder="Senha" />
   <button onclick="login()">Entrar</button>
-  <p id="loginError" style="color:red;"></p>
+  <p id="mensagem"></p>
+
+  <!-- Firebase App e Auth -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+  <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAh4cDk7h-x0IekJyQEvP4FUbHds6z7Dtc",
+  authDomain: "passagem-plantao2025.firebaseapp.com",
+  projectId: "passagem-plantao2025",
+  storageBucket: "passagem-plantao2025.firebasestorage.app",
+  messagingSenderId: "46390981643",
+  appId: "1:46390981643:web:158251408fe14ac4ba030e"
+};
+    firebase.initializeApp(firebaseConfig);
+
+    function login() {
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('password').value;
+      firebase.auth().signInWithEmailAndPassword(email, senha)
+        .then(() => {
+          window.location.href = "home.html";
+        })
+        .catch(error => {
+          document.getElementById('mensagem').innerText = "Erro: " + error.message;
+        });
+    }
+  </script>
 </body>
 </html>
