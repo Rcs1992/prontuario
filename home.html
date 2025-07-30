@@ -1,15 +1,42 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Área Privada</title>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-  <script src="firebase-config.js"></script>
-  <script src="script.js" defer></script>
+  <meta charset="UTF-8" />
+  <title>Área restrita</title>
 </head>
 <body>
-  <h2>Bem-vindo à Área Privada</h2>
+  <h1>Bem-vindo à área restrita</h1>
   <button onclick="logout()">Sair</button>
+
+  <!-- Firebase App e Auth -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+  apiKey: "AIzaSyAh4cDk7h-x0IekJyQEvP4FUbHds6z7Dtc",
+  authDomain: "passagem-plantao2025.firebaseapp.com",
+  projectId: "passagem-plantao2025",
+  storageBucket: "passagem-plantao2025.firebasestorage.app",
+  messagingSenderId: "46390981643",
+  appId: "1:46390981643:web:158251408fe14ac4ba030e"
+};
+
+
+    firebase.initializeApp(firebaseConfig);
+
+    // Redireciona se o usuário não estiver logado
+    firebase.auth().onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "index.html";
+      }
+    });
+
+    function logout() {
+      firebase.auth().signOut().then(() => {
+        window.location.href = "index.html";
+      });
+    }
+  </script>
 </body>
 </html>
