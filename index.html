@@ -1,155 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FisioPad</title>
-  <style>
-    body { font-family: Arial; padding: 20px; }
-    .tab-button { margin-right: 5px; padding: 5px 10px; cursor: pointer; }
-    .tab-button.active { font-weight: bold; background: #ccc; }
-    .hidden { display: none; }
-    textarea { width: 100%; height: 200px; margin-top: 10px; }
-    #loginForm, #logoutBtn { margin-top: 20px; }
-  </style>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
-
-<h2>FisioPad</h2>
-
-<div id="authSection">
-  <div id="loginForm">
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Senha" />
-    <button onclick="login()">Entrar</button>
-    <button onclick="signup()">Cadastrar</button>
-  </div>
-  <div id="logoutSection" class="hidden">
-    <span id="userEmail"></span>
-    <button id="logoutBtn" onclick="logout()">Sair</button>
-  </div>
-</div>
-
-<div id="tabs" class="hidden">
-  <div id="tabButtons"></div>
-  <textarea id="noteArea" oninput="markUnsaved()"></textarea>
-  <button onclick="saveAll()">💾 Salvar Tudo</button>
-</div>
-
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-database-compat.js"></script>
-
-<script>
-  // 🔧 Cole sua config Firebase aqui:
-  const firebaseConfig = {
-const firebaseConfig = {
-  apiKey: "AIzaSyAh4cDk7h-x0IekJyQEvP4FUbHds6z7Dtc",
-  authDomain: "passagem-plantao2025.firebaseapp.com",
-  projectId: "passagem-plantao2025",
-  storageBucket: "passagem-plantao2025.firebasestorage.app",
-  messagingSenderId: "46390981643",
-  appId: "1:46390981643:web:158251408fe14ac4ba030e"
-};
-
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.database();
-
-  let currentUser = null;
-  let currentTab = 0;
-  const notes = Array(10).fill("");
-  const tabs = ["Avaliação", "Condutas", "Desmame", "Exames", "Hemodinâmica", "Ventilação", "Mobilização", "Prognóstico", "Alta", "Outros"];
-
-  // Inicializa botões de abas
-  window.onload = () => {
-    const buttonsDiv = document.getElementById('tabButtons');
-    tabs.forEach((name, i) => {
-      const btn = document.createElement('button');
-      btn.innerText = name;
-      btn.className = 'tab-button';
-      btn.onclick = () => switchTab(i);
-      buttonsDiv.appendChild(btn);
-    });
-
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        currentUser = user;
-        document.getElementById("loginForm").classList.add("hidden");
-        document.getElementById("logoutSection").classList.remove("hidden");
-        document.getElementById("userEmail").innerText = user.email;
-        document.getElementById("tabs").classList.remove("hidden");
-        loadNotes();
-      } else {
-        currentUser = null;
-        document.getElementById("loginForm").classList.remove("hidden");
-        document.getElementById("logoutSection").classList.add("hidden");
-        document.getElementById("tabs").classList.add("hidden");
-      }
-    });
-  }
-
-  function login() {
-    const email = document.getElementById("email").value;
-    const pass = document.getElementById("password").value;
-    auth.signInWithEmailAndPassword(email, pass).catch(alert);
-  }
-
-  function signup() {
-    const email = document.getElementById("email").value;
-    const pass = document.getElementById("password").value;
-    auth.createUserWithEmailAndPassword(email, pass).catch(alert);
-  }
-
-  function logout() {
-    auth.signOut();
-  }
-
-  function switchTab(index) {
-    saveCurrentTab();
-    currentTab = index;
-    document.querySelectorAll('.tab-button').forEach((btn, i) => {
-      btn.classList.toggle("active", i === index);
-    });
-    document.getElementById("noteArea").value = notes[index];
-  }
-
-  function markUnsaved() {
-    // Aqui você pode mudar o botão para mostrar que está com alterações
-  }
-
-  function saveCurrentTab() {
-    notes[currentTab] = document.getElementById("noteArea").value;
-    saveNote(currentTab);
-  }
-
-  function saveNote(index) {
-    if (!currentUser) return;
-    db.ref("users/" + currentUser.uid + "/notes/tab" + index).set(notes[index]);
-  }
-
-  function saveAll() {
-    if (!currentUser) return;
-    notes[currentTab] = document.getElementById("noteArea").value;
-    notes.forEach((text, i) => {
-      db.ref("users/" + currentUser.uid + "/notes/tab" + i).set(text);
-    });
-    alert("Notas salvas!");
-  }
-
-  function loadNotes() {
-    if (!currentUser) return;
-    db.ref("users/" + currentUser.uid + "/notes").once("value", snapshot => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        for (let i = 0; i < 10; i++) {
-          notes[i] = data["tab" + i] || "";
-        }
-      }
-      switchTab(0); // abre a primeira aba
-    });
-  }
-</script>
+  <h2>Login</h2>
+  <input type="email" id="email" placeholder="E-mail" required />
+  <input type="password" id="password" placeholder="Senha" required />
+  <button onclick="login()">Entrar</button>
+  <p id="loginError" style="color:red;"></p>
 </body>
 </html>
