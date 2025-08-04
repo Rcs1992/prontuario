@@ -2,45 +2,169 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Área restrita</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Avaliação Fisioterapêutica</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+
+    .checkbox-group {
+      margin-bottom: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .logout-btn {
+      background-color: #dc3545;
+    }
+
+    .logout-btn:hover {
+      background-color: #a71d2a;
+    }
+  </style>
 </head>
 <body>
-  <h1>Bem-vindo à área restrita</h1>
-  <button onclick="logout()">Sair</button>
-  <button onclick="logout()">Sair</button>
-<button onclick="salvarNoFirestore(coletarDadosFormulario())">Salvar Avaliação</button>
+  <h2>Formulário de Avaliação Fisioterapêutica</h2>
 
+  <label for="nome">Nome do Paciente:</label>
+  <input type="text" id="nome" />
 
-  <!-- Firebase App e Auth -->
+  <label for="idade">Idade:</label>
+  <input type="number" id="idade" />
+
+  <label for="sexo">Sexo:</label>
+  <select id="sexo">
+    <option value="">Selecione</option>
+    <option value="Masculino">Masculino</option>
+    <option value="Feminino">Feminino</option>
+    <option value="Outro">Outro</option>
+  </select>
+
+  <label for="prontuario">Prontuário:</label>
+  <input type="text" id="prontuario" />
+
+  <label for="diagnostico">Diagnóstico:</label>
+  <input type="text" id="diagnostico" />
+
+  <label>Comorbidades:</label>
+  <div class="checkbox-group">
+    <label><input type="checkbox" name="comorbidade" value="HAS" /> HAS</label>
+    <label><input type="checkbox" name="comorbidade" value="DM" /> DM</label>
+    <label><input type="checkbox" name="comorbidade" value="DPOC" /> DPOC</label>
+    <label><input type="checkbox" name="comorbidade" value="DRC" /> DRC</label>
+    <label><input type="checkbox" name="comorbidade" value="Neoplasia" /> Neoplasia</label>
+  </div>
+
+  <label>Drogas Vasoativas:</label>
+  <div class="checkbox-group">
+    <label><input type="checkbox" name="droga" value="Noradrenalina" /> Noradrenalina</label>
+    <label><input type="checkbox" name="droga" value="Vasopressina" /> Vasopressina</label>
+    <label><input type="checkbox" name="droga" value="Dobutamina" /> Dobutamina</label>
+    <label><input type="checkbox" name="droga" value="Adrenalina" /> Adrenalina</label>
+  </div>
+
+  <button onclick="salvarNoFirestore(coletarDadosFormulario())">Salvar Avaliação</button>
+  <button class="logout-btn" onclick="logout()">Sair</button>
+
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
   <script>
+    // Configuração Firebase
     const firebaseConfig = {
-  apiKey: "AIzaSyAh4cDk7h-x0IekJyQEvP4FUbHds6z7Dtc",
-  authDomain: "passagem-plantao2025.firebaseapp.com",
-  projectId: "passagem-plantao2025",
-  storageBucket: "passagem-plantao2025.firebasestorage.app",
-  messagingSenderId: "46390981643",
-  appId: "1:46390981643:web:158251408fe14ac4ba030e"
-};
-
+      apiKey: "AIzaSyAh4cDk7h-x0IekJyQEvP4FUbHds6z7Dtc",
+      authDomain: "passagem-plantao2025.firebaseapp.com",
+      projectId: "passagem-plantao2025",
+      storageBucket: "passagem-plantao2025.firebasestorage.app",
+      messagingSenderId: "46390981643",
+      appId: "1:46390981643:web:158251408fe14ac4ba030e"
+    };
 
     firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    // Redireciona se o usuário não estiver logado
+    // Redireciona para login se não estiver autenticado
     firebase.auth().onAuthStateChanged(user => {
       if (!user) {
         window.location.href = "index.html";
       }
     });
 
+    // Função de logout
     function logout() {
       firebase.auth().signOut().then(() => {
         window.location.href = "index.html";
       });
     }
+
+    // Coleta dados do formulário
+    function coletarDadosFormulario() {
+      return {
+        nome: document.querySelector("#nome").value,
+        idade: document.querySelector("#idade").value,
+        sexo: document.querySelector("#sexo").value,
+        prontuario: document.querySelector("#prontuario").value,
+        diagnostico: document.querySelector("#diagnostico").value,
+        comorbidades: Array.from(document.querySelectorAll('input[name="comorbidade"]:checked')).map(c => c.value),
+        drogasVasoativas: Array.from(document.querySelectorAll('input[name="droga"]:checked')).map(c => c.value),
+        dataHora: new Date().toISOString()
+      };
+    }
+
+    // Salva os dados no Firestore
+    function salvarNoFirestore(dados) {
+      db.collection("avaliacoes").add(dados)
+        .then(() => {
+          alert("Dados salvos com sucesso!");
+          document.querySelectorAll("input, select").forEach(el => {
+            if (el.type === "checkbox") el.checked = false;
+            else el.value = "";
+          });
+        })
+        .catch(error => {
+          console.error("Erro ao salvar dados:", error);
+          alert("Erro ao salvar os dados.");
+        });
+    }
   </script>
 </body>
 </html>
-
