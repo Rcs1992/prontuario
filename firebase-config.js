@@ -1,3 +1,6 @@
+// firebase-config.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyAh4cDk7h-x0IekJyQEvP4FUbHds6z7Dtc",
   authDomain: "passagem-plantao2025.firebaseapp.com",
@@ -7,5 +10,5 @@ const firebaseConfig = {
   appId: "1:46390981643:web:158251408fe14ac4ba030e"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+export default app;
