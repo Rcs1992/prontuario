@@ -1,7 +1,14 @@
-// Login
-function login() {
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
+// script.js
+import app from './firebase-config.js';
+import { getFirestore, collection, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+export function login() {
+  const email = document.getElementById('email')?.value;
+  const password = document.getElementById('password')?.value;
 
   signInWithEmailAndPassword(auth, email, password)
     .then(() => {
@@ -12,23 +19,13 @@ function login() {
     });
 }
 
-// Logout
-function logout() {
+export function logout() {
   signOut(auth).then(() => {
     window.location.href = "index.html";
   });
 }
 
-// Proteção da área privada
-onAuthStateChanged(auth, (user) => {
-  const isHomePage = window.location.pathname.includes("home.html");
-  if (isHomePage && !user) {
-    window.location.href = "index.html";
-  }
-});
-
-// Coletar dados do formulário
-function coletarDadosFormulario() {
+export function coletarDadosFormulario() {
   return {
     leito: document.getElementById("leito")?.value || "",
     estadoGeral: Array.from(document.querySelectorAll(".estadoGeral:checked")).map(el => el.value),
@@ -53,9 +50,7 @@ function coletarDadosFormulario() {
   };
 }
 
-// Salvar no Firestore
-async function salvarNoFirestore() {
-  const dados = coletarDadosFormulario();
+export async function salvarNoFirestore(dados) {
   try {
     await addDoc(collection(db, "avaliacoes"), {
       ...dados,
@@ -68,7 +63,10 @@ async function salvarNoFirestore() {
   }
 }
 
-// Torna funções globais para uso no HTML
-window.login = login;
-window.logout = logout;
-window.salvarNoFirestore = salvarNoFirestore;
+// Protege a home
+onAuthStateChanged(auth, (user) => {
+  const isHomePage = window.location.pathname.includes("home.html");
+  if (isHomePage && !user) {
+    window.location.href = "index.html";
+  }
+});
