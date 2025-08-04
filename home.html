@@ -2,68 +2,142 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Área restrita</title>
+  <title>Prontuário Eletrônico</title>
+  <style>
+    body { font-family: sans-serif; margin: 10px; }
+    input, button, select, textarea { margin: 5px 0; width: 100%; max-width: 400px; }
+    .paciente-item { border: 1px solid #ccc; padding: 8px; margin: 8px 0; border-radius: 5px; }
+    .actions button { margin-right: 6px; }
+  </style>
 </head>
 <body>
-  <h1>Bem-vindo à área restrita</h1>
-
-  <!-- Botões -->
+  <h1>Prontuário Eletrônico</h1>
   <button onclick="logout()">Sair</button>
-  <button onclick="salvarNoFirestore()">Salvar Avaliação</button>
 
-  <!-- Seu formulário aqui abaixo -->
-  <form id="form-avaliacao">
-    <input type="text" id="nomePaciente" placeholder="Nome do paciente">
-    <input type="text" id="idade" placeholder="Idade">
-    <input type="text" id="diagnostico" placeholder="Diagnóstico">
-    <!-- adicione os outros campos conforme necessário -->
-  </form>
+  <h2>Cadastrar / Editar Paciente</h2>
+  <input type="hidden" id="pacienteId" />
+  <input type="text" id="nome" placeholder="Nome completo" />
+  <input type="number" id="idade" placeholder="Idade" />
+  <textarea id="diagnostico" placeholder="Diagnóstico"></textarea>
+  <button onclick="salvarPaciente()">Salvar Paciente</button>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <h2>Lista de Pacientes</h2>
+  <div id="listaPacientes"></div>
 
-  <script>
-    // Configuração do Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyAh4cDk7h-x0IekJyQEvP4FUbHds6z7Dtc",
-      authDomain: "passagem-plantao2025.firebaseapp.com",
-      projectId: "passagem-plantao2025",
-      storageBucket: "passagem-plantao2025.firebasestorage.app",
-      messagingSenderId: "46390981643",
-      appId: "1:46390981643:web:158251408fe14ac4ba030e"
-    };
+  <script type="module">
+    import app from './firebase-config.js';
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // Inicializa Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    // Protege a página
-    auth.onAuthStateChanged(user => {
-      if (!user) window.location.href = "index.html";
+    let usuarioAtual = null;
+
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        window.location.href = "index.html";
+      } else {
+        usuarioAtual = user;
+        carregarPacientes();
+      }
     });
 
-    // Logout
-    function logout() {
-      auth.signOut()
-        .then(() => window.location.href = "index.html")
-        .catch(error => alert("Erro ao sair: " + error.message));
+    async function logout() {
+      await signOut(auth);
+      window.location.href = "index.html";
     }
 
-    // Salvar dados
-    function salvarNoFirestore() {
-      const dados = {
-        nomePaciente: document.getElementById("nomePaciente").value,
-        idade: document.getElementById("idade").value,
-        diagnostico: document.getElementById("diagnostico").value,
-        // Adicione todos os outros campos aqui...
-      };
+    async function salvarPaciente() {
+      const nome = document.getElementById("nome").value.trim();
+      const idade = document.getElementById("idade").value.trim();
+      const diagnostico = document.getElementById("diagnostico").value.trim();
+      const pacienteId = document.getElementById("pacienteId").value;
 
-      db.collection("avaliacoes").add(dados)
-        .then(() => alert("Dados salvos com sucesso!"))
-        .catch(error => alert("Erro ao salvar: " + error.message));
+      if (!nome || !idade) {
+        alert("Nome e idade são obrigatórios.");
+        return;
+      }
+
+      if (pacienteId) {
+        // Atualizar paciente
+        const pacienteRef = doc(db, "pacientes", pacienteId);
+        await updateDoc(pacienteRef, { nome, idade: Number(idade), diagnostico });
+        alert("Paciente atualizado!");
+      } else {
+        // Novo paciente
+        await addDoc(collection(db, "pacientes"), {
+          nome,
+          idade: Number(idade),
+          diagnostico,
+          userId: usuarioAtual.uid,
+          criadoEm: new Date()
+        });
+        alert("Paciente cadastrado!");
+      }
+
+      limparFormulario();
+      carregarPacientes();
+    }
+
+    async function carregarPacientes() {
+      const listaDiv = document.getElementById("listaPacientes");
+      listaDiv.innerHTML = "Carregando...";
+
+      const q = query(collection(db, "pacientes"), where("userId", "==", usuarioAtual.uid));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        listaDiv.innerHTML = "<p>Nenhum paciente cadastrado.</p>";
+        return;
+      }
+
+      listaDiv.innerHTML = "";
+
+      querySnapshot.forEach(docSnap => {
+        const paciente = docSnap.data();
+        const pacienteId = docSnap.id;
+
+        const div = document.createElement("div");
+        div.classList.add("paciente-item");
+        div.innerHTML = `
+          <strong>${paciente.nome}</strong> (Idade: ${paciente.idade})<br>
+          Diagnóstico: ${paciente.diagnostico || '-'}<br>
+          <div class="actions">
+            <button onclick="editarPaciente('${pacienteId}')">Editar</button>
+            <button onclick="deletarPaciente('${pacienteId}')">Deletar</button>
+          </div>
+        `;
+
+        listaDiv.appendChild(div);
+      });
+    }
+
+    async function editarPaciente(id) {
+      const pacienteRef = doc(db, "pacientes", id);
+      const pacienteSnap = await getDoc(pacienteRef);
+      if (pacienteSnap.exists()) {
+        const paciente = pacienteSnap.data();
+        document.getElementById("pacienteId").value = id;
+        document.getElementById("nome").value = paciente.nome || "";
+        document.getElementById("idade").value = paciente.idade || "";
+        document.getElementById("diagnostico").value = paciente.diagnostico || "";
+      }
+    }
+
+    async function deletarPaciente(id) {
+      if (confirm("Confirma a exclusão do paciente?")) {
+        await deleteDoc(doc(db, "pacientes", id));
+        alert("Paciente deletado.");
+        carregarPacientes();
+      }
+    }
+
+    function limparFormulario() {
+      document.getElementById("pacienteId").value = "";
+      document.getElementById("nome").value = "";
+      document.getElementById("idade").value = "";
+      document.getElementById("diagnostico").value = "";
     }
   </script>
 </body>
