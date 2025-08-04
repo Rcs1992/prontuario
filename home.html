@@ -5,55 +5,37 @@
   <title>Área restrita</title>
 </head>
 <body>
-  <h1>Bem-vindo à área restrita</h1>
-  <button onclick="logout()">Sair</button>
-  <button onclick="salvarNoFirestore(coletarDadosFormulario())">Salvar Avaliação</button>
+  <h1>Formulário de Avaliação Fisioterapêutica</h1>
 
-  <form id="formulario">
-    <label>Leito: <input id="leito" /></label><br>
+  <!-- FORMULÁRIO -->
+  <form id="formAvaliacao">
+    <input type="text" id="nome" placeholder="Nome" required />
+    <input type="text" id="prontuario" placeholder="Prontuário" />
+    <input type="number" id="idade" placeholder="Idade" />
+    <input type="date" id="dataInternacao" placeholder="Data de internação" />
+    <input type="text" id="diagnostico" placeholder="Diagnóstico" />
 
-    <label>Estado geral:</label><br>
-    <label><input type="checkbox" class="estadoGeral" value="afebril"> Afebril</label>
-    <label><input type="checkbox" class="estadoGeral" value="febril"> Febril</label><br>
+    <label>Comorbidades:</label><br>
+    <input type="checkbox" name="comorbidades" value="HAS" /> HAS<br>
+    <input type="checkbox" name="comorbidades" value="DM" /> DM<br>
+    <input type="checkbox" name="comorbidades" value="DPOC" /> DPOC<br>
+    <input type="checkbox" name="comorbidades" value="DRC" /> DRC<br>
+    <input type="checkbox" name="comorbidades" value="Neoplasia" /> Neoplasia<br>
 
-    <label>Nível de consciência: <input id="nivelConsciencia" /></label><br>
-
-    <label>Sedado? <input type="checkbox" id="sedado" /></label><br>
-    <label>RASS: <input id="rass" /></label><br>
-
-    <fieldset>
-      <legend>Drogas vasoativas</legend>
-      <label><input type="checkbox" class="droga" value="noradrenalina"> Noradrenalina</label>
-      <input id="noradrenalina_dose" placeholder="Dose" />
-      <br>
-      <label><input type="checkbox" class="droga" value="dopamina"> Dopamina</label>
-      <input id="dopamina_dose" placeholder="Dose" />
-    </fieldset>
-
-    <label>Respiração espontânea: <input id="respiracao" /></label><br>
-    <label>Modo ventilatório: <input id="modoVentilatorio" /></label><br>
-    <label>PEEP: <input id="peep" /></label><br>
-    <label>PIP: <input id="pip" /></label><br>
-    <label>Pressão de suporte: <input id="pressaoSuporte" /></label><br>
-    <label>FR: <input id="fr" /></label><br>
-    <label>FiO2: <input id="fio2" /></label><br>
-    <label>Mecânica ventilatória: <input id="mecVent" /></label><br>
-
-    <label>Condutas:<br>
-      <select id="condutas" multiple>
-        <option value="reavaliar">Reavaliar</option>
-        <option value="mobilizacao">Mobilização</option>
-      </select>
-    </label><br>
-
-    <label>Observações finais:<br>
-      <textarea id="obsFinais"></textarea>
-    </label>
+    <!-- + todos os campos que você quiser -->
+    <br>
+    <button type="submit">Salvar Avaliação</button>
   </form>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script type="module" src="./firebase-config.js"></script>
-  <script type="module" src="./script.js"></script>
+  <br>
+  <button onclick="logout()">Sair</button>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <!-- Script principal -->
+  <script src="script.js" type="module"></script>
 </body>
 </html>
