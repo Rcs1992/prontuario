@@ -5,37 +5,66 @@
   <title>Área restrita</title>
 </head>
 <body>
-  <h1>Formulário de Avaliação Fisioterapêutica</h1>
+  <h1>Bem-vindo à área restrita</h1>
 
-  <!-- FORMULÁRIO -->
-  <form id="formAvaliacao">
-    <input type="text" id="nome" placeholder="Nome" required />
-    <input type="text" id="prontuario" placeholder="Prontuário" />
-    <input type="number" id="idade" placeholder="Idade" />
-    <input type="date" id="dataInternacao" placeholder="Data de internação" />
-    <input type="text" id="diagnostico" placeholder="Diagnóstico" />
+  <!-- Botões -->
+  <button onclick="logout()">Sair</button>
+  <button onclick="salvarNoFirestore()">Salvar Avaliação</button>
 
-    <label>Comorbidades:</label><br>
-    <input type="checkbox" name="comorbidades" value="HAS" /> HAS<br>
-    <input type="checkbox" name="comorbidades" value="DM" /> DM<br>
-    <input type="checkbox" name="comorbidades" value="DPOC" /> DPOC<br>
-    <input type="checkbox" name="comorbidades" value="DRC" /> DRC<br>
-    <input type="checkbox" name="comorbidades" value="Neoplasia" /> Neoplasia<br>
-
-    <!-- + todos os campos que você quiser -->
-    <br>
-    <button type="submit">Salvar Avaliação</button>
+  <!-- Seu formulário aqui abaixo -->
+  <form id="form-avaliacao">
+    <input type="text" id="nomePaciente" placeholder="Nome do paciente">
+    <input type="text" id="idade" placeholder="Idade">
+    <input type="text" id="diagnostico" placeholder="Diagnóstico">
+    <!-- adicione os outros campos conforme necessário -->
   </form>
 
-  <br>
-  <button onclick="logout()">Sair</button>
-
-  <!-- Firebase -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-  <!-- Script principal -->
-  <script src="script.js" type="module"></script>
+  <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAh4cDk7h-x0IekJyQEvP4FUbHds6z7Dtc",
+      authDomain: "passagem-plantao2025.firebaseapp.com",
+      projectId: "passagem-plantao2025",
+      storageBucket: "passagem-plantao2025.firebasestorage.app",
+      messagingSenderId: "46390981643",
+      appId: "1:46390981643:web:158251408fe14ac4ba030e"
+    };
+
+    // Inicializa Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Protege a página
+    auth.onAuthStateChanged(user => {
+      if (!user) window.location.href = "index.html";
+    });
+
+    // Logout
+    function logout() {
+      auth.signOut()
+        .then(() => window.location.href = "index.html")
+        .catch(error => alert("Erro ao sair: " + error.message));
+    }
+
+    // Salvar dados
+    function salvarNoFirestore() {
+      const dados = {
+        nomePaciente: document.getElementById("nomePaciente").value,
+        idade: document.getElementById("idade").value,
+        diagnostico: document.getElementById("diagnostico").value,
+        // Adicione todos os outros campos aqui...
+      };
+
+      db.collection("avaliacoes").add(dados)
+        .then(() => alert("Dados salvos com sucesso!"))
+        .catch(error => alert("Erro ao salvar: " + error.message));
+    }
+  </script>
 </body>
 </html>
