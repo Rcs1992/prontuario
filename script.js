@@ -1,15 +1,4 @@
-// Importações no topo
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-import { firebaseConfig } from './firebase-config.js';
-
-// Inicializa Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// LOGIN
+// Login
 function login() {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
@@ -23,14 +12,22 @@ function login() {
     });
 }
 
-// LOGOUT
+// Logout
 function logout() {
   signOut(auth).then(() => {
     window.location.href = "index.html";
   });
 }
 
-// FORMULÁRIO – Coleta de dados
+// Proteção da área privada
+onAuthStateChanged(auth, (user) => {
+  const isHomePage = window.location.pathname.includes("home.html");
+  if (isHomePage && !user) {
+    window.location.href = "index.html";
+  }
+});
+
+// Coletar dados do formulário
 function coletarDadosFormulario() {
   return {
     leito: document.getElementById("leito")?.value || "",
@@ -56,8 +53,9 @@ function coletarDadosFormulario() {
   };
 }
 
-// SALVAR NO FIRESTORE
-async function salvarNoFirestore(dados) {
+// Salvar no Firestore
+async function salvarNoFirestore() {
+  const dados = coletarDadosFormulario();
   try {
     await addDoc(collection(db, "avaliacoes"), {
       ...dados,
@@ -70,16 +68,7 @@ async function salvarNoFirestore(dados) {
   }
 }
 
-// PROTEÇÃO DA HOME
-onAuthStateChanged(auth, (user) => {
-  const isHomePage = window.location.pathname.includes("home.html");
-  if (isHomePage && !user) {
-    window.location.href = "index.html";
-  }
-});
-
-// Exportar funções para o HTML usar
+// Torna funções globais para uso no HTML
 window.login = login;
 window.logout = logout;
 window.salvarNoFirestore = salvarNoFirestore;
-window.coletarDadosFormulario = coletarDadosFormulario;
