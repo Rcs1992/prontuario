@@ -2,169 +2,58 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Avaliação Fisioterapêutica</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: auto;
-      padding: 20px;
-      background-color: #f8f9fa;
-    }
-
-    h2 {
-      text-align: center;
-    }
-
-    label {
-      font-weight: bold;
-      margin-top: 10px;
-      display: block;
-    }
-
-    input[type="text"],
-    input[type="number"],
-    select {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      margin-bottom: 10px;
-    }
-
-    .checkbox-group {
-      margin-bottom: 10px;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      background-color: #007bff;
-      border: none;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    .logout-btn {
-      background-color: #dc3545;
-    }
-
-    .logout-btn:hover {
-      background-color: #a71d2a;
-    }
-  </style>
+  <title>Área restrita</title>
 </head>
 <body>
-  <h2>Formulário de Avaliação Fisioterapêutica</h2>
-
-  <label for="nome">Nome do Paciente:</label>
-  <input type="text" id="nome" />
-
-  <label for="idade">Idade:</label>
-  <input type="number" id="idade" />
-
-  <label for="sexo">Sexo:</label>
-  <select id="sexo">
-    <option value="">Selecione</option>
-    <option value="Masculino">Masculino</option>
-    <option value="Feminino">Feminino</option>
-    <option value="Outro">Outro</option>
-  </select>
-
-  <label for="prontuario">Prontuário:</label>
-  <input type="text" id="prontuario" />
-
-  <label for="diagnostico">Diagnóstico:</label>
-  <input type="text" id="diagnostico" />
-
-  <label>Comorbidades:</label>
-  <div class="checkbox-group">
-    <label><input type="checkbox" name="comorbidade" value="HAS" /> HAS</label>
-    <label><input type="checkbox" name="comorbidade" value="DM" /> DM</label>
-    <label><input type="checkbox" name="comorbidade" value="DPOC" /> DPOC</label>
-    <label><input type="checkbox" name="comorbidade" value="DRC" /> DRC</label>
-    <label><input type="checkbox" name="comorbidade" value="Neoplasia" /> Neoplasia</label>
-  </div>
-
-  <label>Drogas Vasoativas:</label>
-  <div class="checkbox-group">
-    <label><input type="checkbox" name="droga" value="Noradrenalina" /> Noradrenalina</label>
-    <label><input type="checkbox" name="droga" value="Vasopressina" /> Vasopressina</label>
-    <label><input type="checkbox" name="droga" value="Dobutamina" /> Dobutamina</label>
-    <label><input type="checkbox" name="droga" value="Adrenalina" /> Adrenalina</label>
-  </div>
-
+  <h1>Bem-vindo à área restrita</h1>
+  <button onclick="logout()">Sair</button>
   <button onclick="salvarNoFirestore(coletarDadosFormulario())">Salvar Avaliação</button>
-  <button class="logout-btn" onclick="logout()">Sair</button>
 
-  <!-- Firebase SDKs -->
+  <form id="formulario">
+    <label>Leito: <input id="leito" /></label><br>
+
+    <label>Estado geral:</label><br>
+    <label><input type="checkbox" class="estadoGeral" value="afebril"> Afebril</label>
+    <label><input type="checkbox" class="estadoGeral" value="febril"> Febril</label><br>
+
+    <label>Nível de consciência: <input id="nivelConsciencia" /></label><br>
+
+    <label>Sedado? <input type="checkbox" id="sedado" /></label><br>
+    <label>RASS: <input id="rass" /></label><br>
+
+    <fieldset>
+      <legend>Drogas vasoativas</legend>
+      <label><input type="checkbox" class="droga" value="noradrenalina"> Noradrenalina</label>
+      <input id="noradrenalina_dose" placeholder="Dose" />
+      <br>
+      <label><input type="checkbox" class="droga" value="dopamina"> Dopamina</label>
+      <input id="dopamina_dose" placeholder="Dose" />
+    </fieldset>
+
+    <label>Respiração espontânea: <input id="respiracao" /></label><br>
+    <label>Modo ventilatório: <input id="modoVentilatorio" /></label><br>
+    <label>PEEP: <input id="peep" /></label><br>
+    <label>PIP: <input id="pip" /></label><br>
+    <label>Pressão de suporte: <input id="pressaoSuporte" /></label><br>
+    <label>FR: <input id="fr" /></label><br>
+    <label>FiO2: <input id="fio2" /></label><br>
+    <label>Mecânica ventilatória: <input id="mecVent" /></label><br>
+
+    <label>Condutas:<br>
+      <select id="condutas" multiple>
+        <option value="reavaliar">Reavaliar</option>
+        <option value="mobilizacao">Mobilização</option>
+      </select>
+    </label><br>
+
+    <label>Observações finais:<br>
+      <textarea id="obsFinais"></textarea>
+    </label>
+  </form>
+
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
-  <script>
-    // Configuração Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyAh4cDk7h-x0IekJyQEvP4FUbHds6z7Dtc",
-      authDomain: "passagem-plantao2025.firebaseapp.com",
-      projectId: "passagem-plantao2025",
-      storageBucket: "passagem-plantao2025.firebasestorage.app",
-      messagingSenderId: "46390981643",
-      appId: "1:46390981643:web:158251408fe14ac4ba030e"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    // Redireciona para login se não estiver autenticado
-    firebase.auth().onAuthStateChanged(user => {
-      if (!user) {
-        window.location.href = "index.html";
-      }
-    });
-
-    // Função de logout
-    function logout() {
-      firebase.auth().signOut().then(() => {
-        window.location.href = "index.html";
-      });
-    }
-
-    // Coleta dados do formulário
-    function coletarDadosFormulario() {
-      return {
-        nome: document.querySelector("#nome").value,
-        idade: document.querySelector("#idade").value,
-        sexo: document.querySelector("#sexo").value,
-        prontuario: document.querySelector("#prontuario").value,
-        diagnostico: document.querySelector("#diagnostico").value,
-        comorbidades: Array.from(document.querySelectorAll('input[name="comorbidade"]:checked')).map(c => c.value),
-        drogasVasoativas: Array.from(document.querySelectorAll('input[name="droga"]:checked')).map(c => c.value),
-        dataHora: new Date().toISOString()
-      };
-    }
-
-    // Salva os dados no Firestore
-    function salvarNoFirestore(dados) {
-      db.collection("avaliacoes").add(dados)
-        .then(() => {
-          alert("Dados salvos com sucesso!");
-          document.querySelectorAll("input, select").forEach(el => {
-            if (el.type === "checkbox") el.checked = false;
-            else el.value = "";
-          });
-        })
-        .catch(error => {
-          console.error("Erro ao salvar dados:", error);
-          alert("Erro ao salvar os dados.");
-        });
-    }
-  </script>
+  <script type="module" src="./firebase-config.js"></script>
+  <script type="module" src="./script.js"></script>
 </body>
 </html>
